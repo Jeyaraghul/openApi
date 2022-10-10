@@ -22,14 +22,12 @@ pipeline {
 
           openshift.withCluster() { 
   openshift.withProject("demo-learn") {
-  
-    def buildConfigExists = openshift.selector("bc", "openApi").exists() 
-    
-    if(!buildConfigExists){ 
-      openshift.newBuild("--name=openApi", "--docker-image=registry.redhat.io/jboss-eap-7/eap74-openjdk8-openshift-rhel7", "--binary") 
-    } 
-    openshift.selector("bc", "openApi").startBuild("--from-file=target/OpenAPI-0.0.1-SNAPSHOT.jar", "--follow")
+  openshift.startBuild("openApi",
+  "--from-file=target/OpenAPI-0.0.1-SNAPSHOT.jar",
+  "---wait"
 
+  )
+    
         }
       }
     }}}
@@ -40,20 +38,20 @@ pipeline {
 
           openshift.withCluster() { 
   openshift.withProject("demo-learn") { 
-    def deployment = openshift.selector("dc", "openApi") 
+    def result, dc = openshift.selector("dc", "openApi") 
     
-    if(!deployment.exists()){ 
-      openshift.newApp('openApi', "--as-deployment-config").narrow('svc').expose() 
-    } 
-    
-    timeout(5) { 
-      openshift.selector("dc", "openApi").related('pods').untilEach(1) { 
-        return (it.object().status.phase == "Running") 
+    dc.rollout().latest()
+    timeout(10){
+        result = dc.rollout().status("-w")
+    }
+    if (result.status != 0){
+        error(result.err)
+    }
+
 
         }
       }
     }
   }}}}
-}
-}
+
 
