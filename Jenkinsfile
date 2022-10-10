@@ -24,7 +24,7 @@ pipeline {
   openshift.withProject("demo-learn") {
   openshift.startBuild("openApi",
   "--from-file=target/OpenAPI-0.0.1-SNAPSHOT.jar",
-  "---wait=true")
+  "--wait")
     
         }
       }
