@@ -22,7 +22,7 @@ pipeline {
 
           openshift.withCluster() { 
   openshift.withProject("demo-learn") {
-  openshift.startBuild("openApi",
+  openshift.startBuild("open-api-git",
   "--from-file=target/OpenAPI-0.0.1-SNAPSHOT.jar",
   "--wait")
     
@@ -36,7 +36,7 @@ pipeline {
 
           openshift.withCluster() { 
   openshift.withProject("demo-learn") { 
-    def result, dc = openshift.selector("dc", "openApi") 
+    def result, dc = openshift.selector("dc", "open-api-git") 
     
     dc.rollout().latest()
     timeout(10){
